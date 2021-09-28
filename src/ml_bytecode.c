@@ -656,6 +656,11 @@ static void DEBUG_FUNC(frame_run)(DEBUG_STRUCT(frame) *Frame, ml_value_t *Result
 		ml_value_t *Function = Top[~Count];
 		ml_value_t **Args = Top - Count;
 		ml_inst_t *Next = Inst + 2;
+        if (!Function) {
+            Result = ml_error("InternalError", "Function is NULL");
+            ml_error_trace_add(Result, (ml_source_t){Frame->Source, Inst->Line});
+            ERROR();
+        }
 #ifdef ML_SCHEDULER
 		Frame->Schedule.Counter[0] = Counter;
 #endif
