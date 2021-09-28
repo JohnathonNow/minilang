@@ -5090,7 +5090,7 @@ static ml_value_t *ml_global_assign(ml_global_t *Global, ml_value_t *Value) {
 
 static void ml_global_call(ml_state_t *Caller, ml_global_t *Global, int Count, ml_value_t **Args) {
     if (!Global->Value) {
-        printf("The big sad occured!\n");
+        return ml_error("NameError", "identifier %s not bound", Global->Name);
     }
 	return ml_call(Caller, Global->Value, Count, Args);
 }
