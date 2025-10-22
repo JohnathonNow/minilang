@@ -948,6 +948,7 @@ ssize_t ml_stringbuffer_add(ml_stringbuffer_t *Buffer, const char *String, size_
 		String += Buffer->Space;
 		Remaining -= Buffer->Space;
 		ml_stringbuffer_node_t *Next = (ml_stringbuffer_node_t *)GC_MALLOC_EXPLICITLY_TYPED(sizeof(ml_stringbuffer_node_t), StringBufferDesc);
+		Next->Next = NULL;
 			//printf("Allocating stringbuffer: %d in total\n", ++NumStringBuffers);
 		Node->Next = Next;
 		Node = Next;
