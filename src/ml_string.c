@@ -941,23 +941,31 @@ struct ml_stringbuffer_node_t {
 static GC_descr StringBufferDesc = 0;
 
 ssize_t ml_stringbuffer_add(ml_stringbuffer_t *Buffer, const char *String, size_t Length) {
+	if (Length == 0) return 0;
 	size_t Remaining = Length;
-	ml_stringbuffer_node_t *Node = Buffer->Tail ?: (ml_stringbuffer_node_t *)&Buffer->Head;
-	while (Buffer->Space < Remaining) {
-		memcpy(Node->Chars + ML_STRINGBUFFER_NODE_SIZE - Buffer->Space, String, Buffer->Space);
-		String += Buffer->Space;
-		Remaining -= Buffer->Space;
-		ml_stringbuffer_node_t *Next = (ml_stringbuffer_node_t *)GC_MALLOC_EXPLICITLY_TYPED(sizeof(ml_stringbuffer_node_t), StringBufferDesc);
-		Next->Next = NULL;
-			//printf("Allocating stringbuffer: %d in total\n", ++NumStringBuffers);
-		Node->Next = Next;
-		Node = Next;
-		Buffer->Space = ML_STRINGBUFFER_NODE_SIZE;
+	ml_stringbuffer_node_t *Node = Buffer->Tail;
+	if (Node) {
+		size_t Copy = Buffer->Space;
+		if (Copy > Remaining) Copy = Remaining;
+		memcpy(Node->Chars + ML_STRINGBUFFER_NODE_SIZE - Buffer->Space, String, Copy);
+		String += Copy;
+		Remaining -= Copy;
+		Buffer->Space -= Copy;
 	}
-	memcpy(Node->Chars + ML_STRINGBUFFER_NODE_SIZE - Buffer->Space, String, Remaining);
-	Buffer->Space -= Remaining;
+	while (Remaining > 0) {
+		ml_stringbuffer_node_t *Next = (ml_stringbuffer_node_t *)GC_MALLOC_EXPLICITLY_TYPED(sizeof(ml_stringbuffer_node_t), StringBufferDesc);
+		if (Node) Node->Next = Next; else Buffer->Head = Next;
+		Node = Next;
+		Buffer->Tail = Node;
+		Buffer->Space = ML_STRINGBUFFER_NODE_SIZE;
+		size_t Copy = Buffer->Space;
+		if (Copy > Remaining) Copy = Remaining;
+		memcpy(Node->Chars + ML_STRINGBUFFER_NODE_SIZE - Buffer->Space, String, Copy);
+		String += Copy;
+		Remaining -= Copy;
+		Buffer->Space -= Copy;
+	}
 	Buffer->Length += Length;
-	Buffer->Tail = Node;
 	return Length;
 }
 
