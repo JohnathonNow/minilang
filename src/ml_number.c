@@ -2562,7 +2562,7 @@ uint64_t ml_random_integer(uint64_t Limit) {
 		arc4random_buf(&Random, 8);
 		return Random;
 	} else {
-		int Zeros = __builtin_clzg(Limit);
+		int Zeros = __builtin_clzll(Limit);
 		int Bytes = (71 - Zeros) / 8;
 		uint64_t Mask = (uint64_t)0xFFFFFFFFFFFFFFFF >> Zeros;
 		uint64_t Random;
