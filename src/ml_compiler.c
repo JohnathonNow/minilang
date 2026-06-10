@@ -5931,10 +5931,12 @@ with_name:
 		mlc_expr_t **ArgsSlot = &ListExpr->Child;
 		if (!ml_parse2(Parser, MLT_RIGHT_SQUARE)) {
 			do {
+				if (ml_parse2(Parser, MLT_RIGHT_SQUARE)) goto EndList;
 				mlc_expr_t *Arg = ArgsSlot[0] = ml_accept_expression(Parser, EXPR_DEFAULT);
 				ArgsSlot = &Arg->Next;
 			} while (ml_parse2(Parser, MLT_COMMA));
 			ml_accept(Parser, MLT_RIGHT_SQUARE);
+			EndList:;
 		}
 		return ML_EXPR_END(ListExpr);
 	}
@@ -5945,6 +5947,7 @@ with_name:
 		if (!ml_parse2(Parser, MLT_RIGHT_BRACE)) {
 			int UseTemplate = 1;
 			do {
+				if (ml_parse2(Parser, MLT_RIGHT_BRACE)) goto EndMap;
 				mlc_expr_t *Arg = ArgsSlot[0] = ml_accept_expression(Parser, EXPR_DEFAULT);
 				if (Arg->compile != (void *)ml_value_expr_compile) UseTemplate = 0;
 				ArgsSlot = &Arg->Next;
@@ -5959,6 +5962,7 @@ with_name:
 				}
 			} while (ml_parse2(Parser, MLT_COMMA));
 			ml_accept(Parser, MLT_RIGHT_BRACE);
+			EndMap:;
 			if (UseTemplate) {
 				ML_EXPR(CallExpr, parent_value, const_call);
 				ml_value_t *Template = CallExpr->Value = ml_map();
